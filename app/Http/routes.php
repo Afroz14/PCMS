@@ -11,14 +11,33 @@
 |
 */
 
-Route::get('/', 'WelcomeController@index');
 
-Route::get('home', 'HomeController@index');
+Route::post("/addMenuCategory","RestaurantController@addMenuCategory");
+Route::post("editMenuCategory","RestaurantController@editMenuCategory");
+Route::post("/addMenuItem","RestaurantController@addMenuItem");
+Route::post("/updateRestaurantBasicDetail","RestaurantController@updateRestaurantBasicDetail");
+Route::post("/updateRestaurantMenuDetail","RestaurantController@updateRestaurantMenuDetail");
+Route::get('/removeMenuItem', 'RestaurantController@removeMenuItem');
+Route::get('/removeMenuCategory', 'RestaurantController@removeMenuCategory');
 
-Route::controllers([
-	'auth' => 'Auth\AuthController',
-	'password' => 'Auth\PasswordController',
-]);
+/* Login related routes */
+Route::get('/auth/login', array('as' => 'login' ,'uses' => 'Auth\AuthController@showLogin'));
+Route::post('/auth/verify',"Auth\AuthController@doLogin");
+Route::get('/logout', function() {
+	   Auth::logout();
+       return Redirect::to('/auth/login');
+});
 
-Route::get('/reporting', ['uses' =>'ReportController@index', 'as' => 'Report']);
-Route::post('/reporting', ['uses' =>'ReportController@post']);
+Route::group(array('before' => 'auth'), function() { 
+	Route::get('/', 'WelcomeController@index');
+	Route::post("/addRestaurant","RestaurantController@addRestaurant");
+	Route::get("/addRestaurantPanel","RestaurantController@addRestaurantPanel");
+	Route::get("/manageRestaurantPanel","RestaurantController@showManageRestaurantPanel");
+
+});
+
+Route::filter('auth',function(){
+	if(Auth::guest()){
+		return Redirect::route("login");
+	}
+});

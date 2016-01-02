@@ -1,38 +1,49 @@
-<?php namespace App\Http\Controllers\Auth;
+<?php
+namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Auth\UserProvider;
+use App\Http\Controllers\RegisterController;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Auth\Registrar;
-use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Foundation\Auth\ResetsPasswords;
+use Auth;
+use Illuminate\Auth\GenericUser;
+use App\Config\Constants;
+use App\Http\Controllers\MailerController as Mailer;
+
 
 class AuthController extends Controller {
 
-	/*
-	|--------------------------------------------------------------------------
-	| Registration & Login Controller
-	|--------------------------------------------------------------------------
-	|
-	| This controller handles the registration of new users, as well as the
-	| authentication of existing users. By default, this controller uses
-	| a simple trait to add these behaviors. Why don't you explore it?
-	|
-	*/
 
-	use AuthenticatesAndRegistersUsers;
+  public function doLogin() {
 
-	/**
-	 * Create a new authentication controller instance.
-	 *
-	 * @param  \Illuminate\Contracts\Auth\Guard  $auth
-	 * @param  \Illuminate\Contracts\Auth\Registrar  $registrar
-	 * @return void
-	 */
-	public function __construct(Guard $auth, Registrar $registrar)
-	{
-		$this->auth = $auth;
-		$this->registrar = $registrar;
+    // Getting all post data
+    $data = \Input::all();
+    // Applying validation rules.
+    $rules = array(
+		              'email'    => 'required|email',
+		              'password' => 'required|min:6',
+	         );
+    $validator = \Validator::make($data, $rules);
+    if ($validator->fails()){
+        return redirect('/auth/login')->withErrors($validator->getMessageBag()->toArray());
+    }
+    else {
+         $userData = array(
+		                        'email'    => \Input::get('email'),
+		                        'password' => \Input::get('password')
+		     );
+      $rememberMe = true;
+      if (Auth::attempt($userData,$rememberMe)) {
+          return \Redirect::to('/');
+       }
+      else
+         return redirect('/auth/login')->withErrors(array("Username/Password not correct"));
+      }
+  }
 
-		$this->middleware('guest', ['except' => 'getLogout']);
-	}
-
+  function showLogin(){
+  	   return view('auth.login');
+  }
 }

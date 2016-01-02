@@ -98,9 +98,10 @@
   margin-top: 2px;
 }
 .bootstrap-timepicker-widget table td input {
-  width: 25px;
+  width: 31px;
   margin: 0;
   text-align: center;
+  border: 1px solid #ccc;
 }
 .bootstrap-timepicker-widget .modal-content {
   padding: 4px;
